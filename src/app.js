@@ -3,12 +3,13 @@ const app = express();
 
 
 // will only handle GET call to user
-// app.get("/user", (req, res) => {
-//     res.send({
-//         name: "Madhav",
-//         age: 23,
-//     })
-// })
+app.get("/user/:id/:name", (req, res) => {
+    console.log(req.params);
+    res.send({
+        name: "Madhav",
+        age: 23,
+    })
+})
 
 // app.post("/user", (req, res) => {
 //     console.log("Post request to DB");
