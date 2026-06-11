@@ -3,13 +3,13 @@ const app = express();
 
 
 // will only handle GET call to user
-app.get("/user/:id/:name", (req, res) => {
-    console.log(req.params);
-    res.send({
-        name: "Madhav",
-        age: 23,
-    })
-})
+// app.get("/user/:id/:name", (req, res) => {
+//     console.log(req.params);
+//     res.send({
+//         name: "Madhav",
+//         age: 23,
+//     })
+// })
 
 // app.post("/user", (req, res) => {
 //     console.log("Post request to DB");
@@ -17,9 +17,16 @@ app.get("/user/:id/:name", (req, res) => {
 // })
 
 // // app.use will match all HTTP requests to /test
-// app.use("/test", ((req, res) => {
-//     res.send("Test Route Hit");
-// }))
+app.use("/test", ((req, res, next) => {
+    console.log("Test Route Hit");
+    res.send("Test Route Hit");
+    next();
+},
+    (req, res) => {
+        console.log("Test Route Hit 2");
+        res.send("Test Route Hit 2");
+    }
+))
 
 
 app.listen(3001, () => {
