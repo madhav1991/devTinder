@@ -2,6 +2,15 @@ const express = require("express");
 const app = express();
 const { adminAuth, userAuth } = require('./middlewares/auth')
 
+app.use("/getData", (req, res) => {
+    throw new Error("error in get data");
+})
+
+app.use("/", (err, req, res, next) => {
+    if (err) {
+        res.status(500).send("something went wrong")
+    }
+})
 app.use("/admin", adminAuth);
 
 app.get("/user", userAuth, (req, res) => {
