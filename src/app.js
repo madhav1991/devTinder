@@ -1,5 +1,23 @@
 const express = require("express");
 const app = express();
+const { adminAuth, userAuth } = require('./middlewares/auth')
+
+app.use("/admin", adminAuth);
+
+app.get("/user", userAuth, (req, res) => {
+    res.send("User data sent!!!")
+})
+app.use("/user/login", (req, res) => {
+    res.send("user logged in successfully");
+});
+
+// app.use("/user/data", userAuth, (req, res) => {
+//     res.send("User data sent!!!")
+// });
+
+app.get("/admin/data", (req, res) => {
+    res.send("All Admin data sent!!!")
+});
 
 
 // will only handle GET call to user
@@ -16,23 +34,13 @@ const app = express();
 //     res.send("Data saved successfully!");
 // })
 
-// // app.use will match all HTTP requests to /test
-app.use("/test", ((req, res, next) => {
+// // app.get will match all HTTP requests to /test
+app.get("/test", (req, res, next) => {
     console.log("Test Route Hit");
     res.send("Test Route Hit");
     next();
-},
-    (req, res) => {
-        console.log("Test Route Hit 2");
-        res.send("Test Route Hit 2");
-    }
-))
-
-
-app.listen(3001, () => {
-    console.log(`Server is running on port 3000`);
 });
 
-// app.use((req, res) => {
-//     res.send("This is dev tinder!");
-// })
+app.listen(3000, () => {
+    console.log(`Server is running on port 3000`);
+});
