@@ -16,6 +16,16 @@ app.post("/signup", async (req, res) => {
         res.statusCode(500).send("Error creating user")
     }
 })
+
+app.get("/user", async (req, res) => {
+    const users = await User.find({ email: req.body.email })
+    if (users.length === 0) {
+        res.sendStatus(400).send("User does not exist")
+    }
+    else {
+        res.send(users)
+    }
+})
 connectMongose().then(() => {
     console.log("Database connected successfully");
     app.listen(3000, () => {
