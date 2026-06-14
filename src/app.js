@@ -3,6 +3,7 @@ const app = express();
 // const { adminAuth, userAuth } = require('./middlewares/auth')
 const connectMongose = require('./config/database');
 const User = require('./models/user');
+const user = require("./models/user");
 
 app.use(express.json());
 app.post("/signup", async (req, res) => {
@@ -26,6 +27,16 @@ app.get("/user", async (req, res) => {
         res.send(users)
     }
 })
+
+// get all the users for feed
+app.get("/feed", async (req, res) => {
+    try {
+        const users = await User.find({});
+        res.send(users);
+    } catch (err) {
+        res.send(400).send("Error fetching users");
+    }
+});
 connectMongose().then(() => {
     console.log("Database connected successfully");
     app.listen(3000, () => {
