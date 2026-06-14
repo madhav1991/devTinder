@@ -14,14 +14,14 @@ app.post("/signup", async (req, res) => {
         res.send("User created successfully!");
     } catch (error) {
         console.log(error)
-        res.statusCode(500).send("Error creating user")
+        res.status(500).send(error.message)
     }
 })
 
 app.get("/user", async (req, res) => {
     const users = await User.find({ email: req.body.email })
     if (users.length === 0) {
-        res.sendStatus(400).send("User does not exist")
+        res.status(400).send("User does not exist")
     }
     else {
         res.send(users)
@@ -34,7 +34,7 @@ app.get("/feed", async (req, res) => {
         const users = await User.find({});
         res.send(users);
     } catch (err) {
-        res.send(400).send("Error fetching users");
+        res.status(400).send("Error fetching users");
     }
 });
 
@@ -46,19 +46,24 @@ app.delete("/user", async (req, res) => {
 
         res.send("Deleted user successfully")
     } catch (err) {
-        res.send(400).send("Error deleting user");
+        res.status(400).send("Error deleting user");
     }
 })
 
 // update the user 
-app.patch("/user", async (req, res) => {
+app.patch("/user/:userId", async (req, res) => {
     try {
         const uniqueId = req.body.userId;
         const udpatedData = req.body;
-        await User.findOneAndUpdate({ _id: uniqueId }, udpatedData);
+        const ALLOWED_LIST = ["firstName", "lastName", "age", "gender"];
+        const isAllowedDataGood = Object.keys(udpatedData).every((key) => ALLOWED_LIST.includes(key));
+        if (!isAllowedDataGood) {
+            throw new Error("Update not allowed due to restriction")
+        }
+        await User.findOneAndUpdate(udpatedData);
         res.send("User updated successfully")
     } catch (err) {
-        res.send(400).send("Error deleting user");
+        res.status(400).send("Error Updating user" + err.message);
     }
 })
 connectMongose().then(() => {
