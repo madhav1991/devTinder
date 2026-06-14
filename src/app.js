@@ -37,6 +37,30 @@ app.get("/feed", async (req, res) => {
         res.send(400).send("Error fetching users");
     }
 });
+
+// delete the user based on unique id
+app.delete("/user", async (req, res) => {
+    try {
+        const uniqueId = req.body.userId;
+        await User.findByIdAndDelete({ _id: uniqueId })
+
+        res.send("Deleted user successfully")
+    } catch (err) {
+        res.send(400).send("Error deleting user");
+    }
+})
+
+// update the user 
+app.patch("/user", async (req, res) => {
+    try {
+        const uniqueId = req.body.userId;
+        const udpatedData = req.body;
+        await User.findOneAndUpdate({ _id: uniqueId }, udpatedData);
+        res.send("User updated successfully")
+    } catch (err) {
+        res.send(400).send("Error deleting user");
+    }
+})
 connectMongose().then(() => {
     console.log("Database connected successfully");
     app.listen(3000, () => {
