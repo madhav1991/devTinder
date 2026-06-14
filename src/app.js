@@ -3,14 +3,20 @@ const app = express();
 // const { adminAuth, userAuth } = require('./middlewares/auth')
 const connectMongose = require('./config/database');
 const User = require('./models/user');
-const user = require("./models/user");
+const bcrypt = require('bcrypt');
+
 
 app.use(express.json());
 app.post("/signup", async (req, res) => {
     const user = new User(req.body);
 
     try {
-        await user.save();
+        const { firstName, lastName, email, password } = req.body
+        const bcryptHash = await bcrypt.hash(password, 10)
+        const extractedUser = new User({
+            firstName, lastName, email, password: bcryptHash
+        })
+        await extractedUser.save();
         res.send("User created successfully!");
     } catch (error) {
         console.log(error)
@@ -18,6 +24,30 @@ app.post("/signup", async (req, res) => {
     }
 })
 
+app.post("/login", async (req, res) => {
+    // check email address first
+    // check if entered password has correct hash in db
+
+    try {
+        const { email, password } = req.body;
+
+        const user = await User.findOne({ email: email });
+        if (!user) {
+            throw new Error("Invalid credentials! email")
+        }
+
+        const isenteredPasswordCorrect = await bcrypt.compare(password, user.password);
+        if (!isenteredPasswordCorrect) {
+            throw new Error("Invalid credentials!")
+        }
+        else {
+            res.send("Login successfull!")
+        }
+    }
+    catch (error) {
+        res.status(400).send(error.message)
+    }
+})
 app.get("/user", async (req, res) => {
     const users = await User.find({ email: req.body.email })
     if (users.length === 0) {
