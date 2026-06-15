@@ -4,9 +4,12 @@ const app = express();
 const connectMongose = require('./config/database');
 const User = require('./models/user');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken')
+const cookieParser = require('cookie-parser');
 
 
 app.use(express.json());
+app.use(cookieParser());
 app.post("/signup", async (req, res) => {
     const user = new User(req.body);
 
@@ -35,12 +38,16 @@ app.post("/login", async (req, res) => {
         if (!user) {
             throw new Error("Invalid credentials! email")
         }
-
         const isenteredPasswordCorrect = await bcrypt.compare(password, user.password);
+        console.log("isenteredPasswordCorrect", isenteredPasswordCorrect)
         if (!isenteredPasswordCorrect) {
             throw new Error("Invalid credentials!")
         }
         else {
+            const token = await jwt.sign({ _id: user._id }, "MADHAV@tinder$1991");
+            console.log(token);
+
+            res.cookie("token", token);
             res.send("Login successfull!")
         }
     }
@@ -48,6 +55,31 @@ app.post("/login", async (req, res) => {
         res.status(400).send(error.message)
     }
 })
+
+app.get("/profile", async (req, res) => {
+    try {
+        const cookies = req.cookies;
+
+        const { token } = cookies;
+        if (!token) {
+            throw new Error("Invalid token")
+        }
+
+        const decodedMessage = await jwt.verify(token, "MADHAV@tinder$1991");
+        const { _id } = decodedMessage;
+
+        const user = await User.findById(_id);
+
+        if (!user) {
+            throw new Error("User not found")
+        }
+
+        res.send(user)
+    } catch (err) {
+        res.status(400).send(err.message)
+    }
+})
+
 app.get("/user", async (req, res) => {
     const users = await User.find({ email: req.body.email })
     if (users.length === 0) {
