@@ -8,7 +8,6 @@ const jwt = require('jsonwebtoken')
 const cookieParser = require('cookie-parser');
 const { userAuth } = require("./middlewares/auth");
 
-
 app.use(express.json());
 app.use(cookieParser());
 app.post("/signup", async (req, res) => {
@@ -39,13 +38,12 @@ app.post("/login", async (req, res) => {
         if (!user) {
             throw new Error("Invalid credentials! email")
         }
-        const isenteredPasswordCorrect = await bcrypt.compare(password, user.password);
-        console.log("isenteredPasswordCorrect", isenteredPasswordCorrect)
+        const isenteredPasswordCorrect = await user.validatePassword(password);
         if (!isenteredPasswordCorrect) {
             throw new Error("Invalid credentials!")
         }
         else {
-            const token = await jwt.sign({ _id: user._id }, "MADHAV@tinder$1991");
+            const token = await user.getJwtToken();
             console.log(token);
 
             res.cookie("token", token);
