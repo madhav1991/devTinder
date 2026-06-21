@@ -3,6 +3,9 @@ const mongoose = require('mongoose');
 const { userAuth } = require('../middlewares/auth');
 const ConnectionRequest = require('../models/connectionRequest');
 const userRouter = express.Router();
+const User = require('../models/user')
+
+const USER_SAFE_DATA = "firstName lastName age"
 
 // get all the pending connections for a particualr user
 userRouter.get('/user/requests/received', userAuth, async (req, res) => {
@@ -12,7 +15,7 @@ userRouter.get('/user/requests/received', userAuth, async (req, res) => {
         const connectionRequests = await ConnectionRequest.find({
             toUserId: loggedInUser._id,
             status: "interested"
-        }).populate("fromUserId", "firstName lastName age");
+        }).populate("fromUserId", USER_SAFE_DATA);
 
         res.json({
             message: "Data fetched successfully",
@@ -34,12 +37,53 @@ userRouter.get('/user/connections', userAuth, async (req, res) => {
                 { toUserId: loggedInUser._id, status: "accepted" },
                 { fromUserId: loggedInUser._id, status: "accepted" }
             ]
+        }).populate("fromUserId", USER_SAFE_DATA)
+            .populate("toUserId", USER_SAFE_DATA)
+
+        const data = connectionRequests.map((row) => {
+            if (row.fromUserId._id.toString() === loggedInUser._id.toString()) {
+                return row.toUserId;
+            }
+
+            return row.fromUserId
         })
 
-        res.json({ data: connectionRequests })
+        res.json({ data })
 
     } catch (err) {
         return res.status(400).send("Error: " + err.message)
+    }
+})
+
+userRouter.get('/user/feed', userAuth, async (req, res) => {
+    try {
+        // should not show user in their feed
+        // should not show users that user has sent request to
+        // should not show accepted users
+        // should not show rejected users 
+
+        const loggedInUser = req.user;
+
+        const connectionRequests = await ConnectionRequest.find({
+            $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser._id }]
+        }).select("fromUserId toUserId");
+
+        const hideUsersFromFeed = new Set();
+        connectionRequests.forEach((row) => {
+            hideUsersFromFeed.add(row.fromUserId.toString());
+            hideUsersFromFeed.add(row.toUserId.toString());
+        });
+        hideUsersFromFeed.add(loggedInUser._id.toString());
+
+        const users = await User.find({
+            _id: { $nin: Array.from(hideUsersFromFeed) }
+        }).select(USER_SAFE_DATA);
+
+        res.json({
+            data: users
+        });
+    } catch (err) {
+        return res.status(400).send("Error fetching feed" + err.message)
     }
 })
 module.exports = userRouter;
