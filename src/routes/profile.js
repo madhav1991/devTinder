@@ -12,6 +12,8 @@ profileRouter.get("/profile/create", userAuth, async (req, res) => {
     }
 })
 
+
+
 profileRouter.post("/profile/edit", userAuth, async (req, res) => {
     // need be logged in - being checked by userAuth
     // need to check user entered fields are editable 
