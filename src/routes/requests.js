@@ -13,8 +13,8 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res)
         const allowedStatus = ["interested", "rejected"];
 
         if (!allowedStatus.includes(status)) {
-            res.status(400).json({
-                message: "Invalid status request"
+            return res.status(400).json({
+                message: "Invalid status request: " + status
             })
         }
 
@@ -50,5 +50,39 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res)
         res.status(400).send(err.message)
     }
 
+})
+
+requestRouter.post("/request/review/:status/:requestId", userAuth, async (req, res) => {
+    try {
+
+        const loggedUser = req.user;
+        const { status, requestId } = req.params;
+
+        // check if entered status matches accepted or rejected
+        const allowedStatus = ["accepted", "rejected"];
+        if (!allowedStatus.includes(status)) {
+            return res.status(400).json({ message: "Invalid status request" });
+        }
+        // check if reqid belongs to logged in user
+        // check if the api responds to only interested request which converts to accepted or rejected
+        const connectionRequest = await ConnectionRequest.findOne({
+            _id: requestId,
+            toUserId: loggedUser._id,
+            status: "interested"
+        });
+        if (!connectionRequest) {
+            return res.status(404).json({ message: "connection request not found" })
+        }
+
+        connectionRequest.status = status;
+
+        const data = await connectionRequest.save();
+        return res.json({
+            message: "Connection Request updated successfully",
+            data
+        })
+    } catch (err) {
+        res.status(400).json({ message: "Error updating request" + err.message })
+    }
 })
 module.exports = requestRouter
