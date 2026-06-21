@@ -63,7 +63,9 @@ userRouter.get('/user/feed', userAuth, async (req, res) => {
         // should not show rejected users 
 
         const loggedInUser = req.user;
-
+        const page = req.query.page || 1;
+        const limit = req.query.limit || 10;
+        const skip = (page - 1) * limit;
         const connectionRequests = await ConnectionRequest.find({
             $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser._id }]
         }).select("fromUserId toUserId");
@@ -77,7 +79,10 @@ userRouter.get('/user/feed', userAuth, async (req, res) => {
 
         const users = await User.find({
             _id: { $nin: Array.from(hideUsersFromFeed) }
-        }).select(USER_SAFE_DATA);
+        })
+            .select(USER_SAFE_DATA)
+            .skip(skip)
+            .limit(limit);
 
         res.json({
             data: users
