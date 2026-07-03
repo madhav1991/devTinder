@@ -8,8 +8,11 @@ const requestRouter = require('./routes/requests');
 const userRouter = require('./routes/user');
 const cors = require('cors');
 
+
+require('dotenv').config();
+
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: process.env.CLIENT_URL,
     credentials: true
 }))
 app.use(express.json());
@@ -22,8 +25,9 @@ app.use('/', userRouter);
 
 connectMongose().then(() => {
     console.log("Database connected successfully");
-    app.listen(3000, () => {
-        console.log(`Server is running on port 3000`);
+    const port = process.env.PORT || 3000;
+    app.listen(port, () => {
+        console.log(`Server is running on port ${port}`);
     });
 }).catch((error) => {
     console.log(error);
