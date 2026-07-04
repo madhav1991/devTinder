@@ -4,7 +4,7 @@ const paymentRouter = express.Router();
 const razorpayInstance = require('../utils/razorpay')
 const Payment = require("../models/payment");
 const User = require("../models/user");
-import { membershipAmount } from '../utils/constants'
+const { membershipAmount } = require('../utils/constants');
 
 paymentRouter.post("/payment/create", userAuth, async (req, res) => {
     const { membershipType, firstName, lastName } = req.body;
