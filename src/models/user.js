@@ -19,6 +19,10 @@ const userSchema = new mongoose.Schema({
     membershipType: {
         type: String,
     },
+    isPremium: {
+        type: String,
+        default: false,
+    },
     email: {
         type: String,
         required: true,
