@@ -16,6 +16,9 @@ const userSchema = new mongoose.Schema({
     age: {
         type: Number,
     },
+    membershipType: {
+        type: String,
+    },
     email: {
         type: String,
         required: true,

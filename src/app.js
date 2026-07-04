@@ -6,10 +6,13 @@ const authRouter = require('./routes/auth');
 const profileRouter = require('./routes/profile');
 const requestRouter = require('./routes/requests');
 const userRouter = require('./routes/user');
+const paymentRouter = require('./routes/payment')
+
 const cors = require('cors');
 
 
 require('dotenv').config();
+require('./utils/cronjob');
 
 app.use(cors({
     origin: process.env.CLIENT_URL,
