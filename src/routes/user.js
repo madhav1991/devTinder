@@ -5,7 +5,7 @@ const ConnectionRequest = require('../models/connectionRequest');
 const userRouter = express.Router();
 const User = require('../models/user')
 
-const USER_SAFE_DATA = "firstName lastName age"
+const USER_SAFE_DATA = "firstName lastName photoUrl age gender about skills";
 
 // get all the pending connections for a particualr user
 userRouter.get('/user/requests/received', userAuth, async (req, res) => {
@@ -46,7 +46,7 @@ userRouter.get('/user/connections', userAuth, async (req, res) => {
             }
 
             return row.fromUserId
-        })
+        }).filter(user => user && user._id);
 
         res.json({ data })
 
